@@ -4,7 +4,7 @@ import os
 
 pub struct Veth {
 	ns_device string
-	ns_tmp_device string
+	ns_previous_device string
 	ns_ip []string
 
 	host_device string
@@ -12,8 +12,8 @@ pub struct Veth {
 }
 
 pub fn (i Veth) create(pid int) {
-	os.execute_or_exit("ip link add name $i.host_device type veth peer name $i.ns_tmp_device")
-	os.execute_or_exit("ip link set $i.ns_tmp_device netns $pid")
+	os.execute_or_exit("ip link add name $i.host_device type veth peer name $i.ns_previous_device")
+	os.execute_or_exit("ip link set $i.ns_previous_device netns $pid")
 	for ip in i.host_ip {
 		os.execute_or_exit("ip addr add dev $i.host_device $ip")
 	}
@@ -27,7 +27,7 @@ pub fn new_veth(name string) (Interface, bool) {
 
 	return Veth{
 		ns_device: name,
-		ns_tmp_device: tmp_veth(),
+		ns_previous_device: tmp_veth(),
 		ns_ip: os.getenv("NETNS_" + name + "_IP").split(" "),
 		host_device: veth,
 		host_ip: os.getenv("NETNS_" + name + "_VETH_IP").split(" "),

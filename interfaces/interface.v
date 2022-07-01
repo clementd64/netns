@@ -10,14 +10,14 @@ fn tmp_veth() string {
 
 pub interface Interface {
 	ns_device string
-	ns_tmp_device string
+	ns_previous_device string
 	ns_ip []string
 
 	create(pid int)
 }
 
 pub fn (i Interface) setup_ns() {
-	os.execute_or_exit("ip link set dev $i.ns_tmp_device name $i.ns_device")
+	os.execute_or_exit("ip link set dev $i.ns_previous_device name $i.ns_device")
 	for ip in i.ns_ip {
 		os.execute_or_exit("ip addr add dev $i.ns_device $ip")
 	}
